@@ -7,8 +7,9 @@ import {
   createSession,
   findUserByIdentifier,
   getBootstrapSuperAdmin,
+  prepareAuthStore,
   validateUserPassword,
-} from '@/lib/server/in-memory-store';
+} from '@/lib/server/auth-store';
 
 const loginSchema = z.object({
   identifier: z.string().trim().min(3),
@@ -17,6 +18,7 @@ const loginSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    await prepareAuthStore();
     const body = await request.json();
     const parsed = loginSchema.safeParse(body);
 
@@ -24,14 +26,14 @@ export async function POST(request: Request) {
       return NextResponse.json(fail('invalid_payload', parsed.error.message), { status: 400 });
     }
 
-    const user = findUserByIdentifier(parsed.data.identifier);
-    if (!user || !validateUserPassword(user.id, parsed.data.password)) {
+    const user = await findUserByIdentifier(parsed.data.identifier);
+    if (!user || !(await validateUserPassword(user.id, parsed.data.password))) {
       return NextResponse.json(fail('invalid_credentials', 'Invalid login details.'), {
         status: 401,
       });
     }
 
-    const session = createSession(user.id);
+    const session = await createSession(user.id);
     const response = NextResponse.json(
       ok({
         id: user.id,
@@ -52,7 +54,7 @@ export async function POST(request: Request) {
 
     return response;
   } catch {
-    const bootstrapUser = getBootstrapSuperAdmin();
+    const bootstrapUser = await getBootstrapSuperAdmin();
     return NextResponse.json(
       fail(
         'login_failed',

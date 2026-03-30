@@ -40,6 +40,14 @@ export interface CurrentUser {
   status?: 'active' | 'inactive';
 }
 
+export interface SuperAdminProfile {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  role: Role;
+}
+
 async function fetchWithFallback<T>(path: string, fallbackData: T): Promise<T> {
   try {
     const response = await fetch(`${API_BASE}${path}`, {
@@ -240,6 +248,50 @@ export async function createUser(payload: CreateUserPayload): Promise<User> {
   const envelope = (await response.json()) as ApiEnvelope<User>;
   if (!envelope.success || !envelope.data) {
     throw new Error(envelope.error || 'create_user_failed');
+  }
+
+  return envelope.data;
+}
+
+export async function getSuperAdminProfile(): Promise<SuperAdminProfile> {
+  const response = await fetch(`${API_BASE}/settings/super-admin`, {
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    throw new Error('fetch_super_admin_failed');
+  }
+
+  const envelope = (await response.json()) as ApiEnvelope<SuperAdminProfile>;
+  if (!envelope.success || !envelope.data) {
+    throw new Error(envelope.error || 'fetch_super_admin_failed');
+  }
+
+  return envelope.data;
+}
+
+export async function updateSuperAdminProfile(payload: {
+  name: string;
+  username: string;
+  email: string;
+  currentPassword?: string;
+  newPassword?: string;
+}): Promise<SuperAdminProfile> {
+  const response = await fetch(`${API_BASE}/settings/super-admin`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error('update_super_admin_failed');
+  }
+
+  const envelope = (await response.json()) as ApiEnvelope<SuperAdminProfile>;
+  if (!envelope.success || !envelope.data) {
+    throw new Error(envelope.error || 'update_super_admin_failed');
   }
 
   return envelope.data;

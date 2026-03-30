@@ -8,8 +8,9 @@ import {
   allowedCreatorToCreateRole,
   getSessionUser,
   getUsers,
+  prepareAuthStore,
   usernameExists,
-} from '@/lib/server/in-memory-store';
+} from '@/lib/server/auth-store';
 import { Role } from '@/lib/types';
 
 const createUserSchema = z.object({
@@ -32,8 +33,9 @@ function readSessionToken(request: Request) {
 }
 
 export async function GET(request: Request) {
+  await prepareAuthStore();
   const sessionToken = readSessionToken(request);
-  const actor = getSessionUser(sessionToken);
+  const actor = await getSessionUser(sessionToken);
   if (!actor) {
     return NextResponse.json(fail('unauthorized', 'Login required.'), { status: 401 });
   }
@@ -44,13 +46,14 @@ export async function GET(request: Request) {
     });
   }
 
-  return NextResponse.json(ok(getUsers()));
+  return NextResponse.json(ok(await getUsers()));
 }
 
 export async function POST(request: Request) {
   try {
+    await prepareAuthStore();
     const sessionToken = readSessionToken(request);
-    const actor = getSessionUser(sessionToken);
+    const actor = await getSessionUser(sessionToken);
 
     if (!actor) {
       return NextResponse.json(fail('unauthorized', 'Login required.'), { status: 401 });
@@ -69,13 +72,13 @@ export async function POST(request: Request) {
       );
     }
 
-    if (usernameExists(parsed.data.username)) {
+    if (await usernameExists(parsed.data.username)) {
       return NextResponse.json(fail('duplicate_username', 'Username already exists.'), {
         status: 409,
       });
     }
 
-    const user = addUser(
+    const user = await addUser(
       {
         name: parsed.data.name,
         username: parsed.data.username,

@@ -32,6 +32,8 @@ Starter endpoints for preview/demo workflows:
 - `GET /api/v1/accounting/journals`
 - `GET /api/v1/settings/workers`
 - `POST /api/v1/settings/workers`
+- `GET /api/v1/settings/super-admin`
+- `PUT /api/v1/settings/super-admin`
 
 ## Bootstrap Login (Preview)
 
@@ -39,6 +41,22 @@ First super admin user is seeded for initial access:
 - Username: `martin.obaze`
 - Email: `martin@palmcorp.com`
 - Password: `Palm@123`
+
+Super admin can change these details in:
+- `Settings -> Security`
+
+## Database Migrations on Deploy
+
+`npm run build` now runs migrations automatically before build:
+- script chain: `npm run migrate && next build`
+- migration script: `scripts/migrate.mjs`
+
+Set these environment variables in Coolify if needed:
+- `DATABASE_URL`
+- `BOOTSTRAP_SUPER_ADMIN_NAME`
+- `BOOTSTRAP_SUPER_ADMIN_USERNAME`
+- `BOOTSTRAP_SUPER_ADMIN_EMAIL`
+- `BOOTSTRAP_SUPER_ADMIN_PASSWORD`
 
 ## Preview Deployment (Coolify)
 

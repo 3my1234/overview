@@ -85,6 +85,7 @@ export const ROLE_BASED_MENU = {
     { label: 'Dashboard', href: '/dashboard', icon: 'BarChart3' },
     { label: 'Users', href: '/settings/users', icon: 'Settings' },
     { label: 'Workers', href: '/settings/workers', icon: 'Briefcase' },
+    { label: 'Security', href: '/settings/security', icon: 'Settings' },
     { label: 'Inventory', href: '/inventory', icon: 'Package' },
     { label: 'Sales', href: '/sales', icon: 'ShoppingCart' },
     { label: 'Accounting', href: '/accounting', icon: 'Calculator' },

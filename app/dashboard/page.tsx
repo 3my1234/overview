@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { AUTH_SESSION_COOKIE } from '@/lib/auth/constants';
-import { getSessionUser } from '@/lib/server/in-memory-store';
+import { getSessionUser, prepareAuthStore } from '@/lib/server/auth-store';
 
 function resolveDashboardRoute(role: string) {
   switch (role) {
@@ -25,9 +25,10 @@ function resolveDashboardRoute(role: string) {
 }
 
 export default async function DashboardPage() {
+  await prepareAuthStore();
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(AUTH_SESSION_COOKIE)?.value;
-  const user = getSessionUser(sessionToken);
+  const user = await getSessionUser(sessionToken);
 
   if (!user) {
     redirect('/auth/login');

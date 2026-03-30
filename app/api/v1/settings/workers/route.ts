@@ -3,8 +3,7 @@ import { z } from 'zod';
 
 import { fail, ok } from '@/lib/api/envelope';
 import { AUTH_SESSION_COOKIE } from '@/lib/auth/constants';
-import { addWorker, getWorkers } from '@/lib/server/in-memory-store';
-import { getSessionUser } from '@/lib/server/in-memory-store';
+import { addWorker, getSessionUser, getWorkers, prepareAuthStore } from '@/lib/server/auth-store';
 
 const workerSchema = z.object({
   employeeCode: z.string().trim().min(3),
@@ -29,6 +28,7 @@ const workerSchema = z.object({
 });
 
 export async function GET(request: Request) {
+  await prepareAuthStore();
   const cookieHeader = request.headers.get('cookie') || '';
   const sessionToken = cookieHeader
     .split(';')
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     .find((chunk) => chunk.startsWith(`${AUTH_SESSION_COOKIE}=`))
     ?.split('=')[1];
 
-  const actor = getSessionUser(sessionToken);
+  const actor = await getSessionUser(sessionToken);
   if (!actor) {
     return NextResponse.json(fail('unauthorized', 'Login required.'), { status: 401 });
   }
@@ -47,11 +47,12 @@ export async function GET(request: Request) {
     });
   }
 
-  return NextResponse.json(ok(getWorkers()));
+  return NextResponse.json(ok(await getWorkers()));
 }
 
 export async function POST(request: Request) {
   try {
+    await prepareAuthStore();
     const cookieHeader = request.headers.get('cookie') || '';
     const sessionToken = cookieHeader
       .split(';')
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
       .find((chunk) => chunk.startsWith(`${AUTH_SESSION_COOKIE}=`))
       ?.split('=')[1];
 
-    const actor = getSessionUser(sessionToken);
+    const actor = await getSessionUser(sessionToken);
     if (!actor) {
       return NextResponse.json(fail('unauthorized', 'Login required.'), { status: 401 });
     }
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
       return NextResponse.json(fail('invalid_payload', parsed.error.message), { status: 400 });
     }
 
-    const worker = addWorker({
+    const worker = await addWorker({
       id: `worker_${Date.now()}`,
       employeeCode: parsed.data.employeeCode,
       fullName: parsed.data.fullName,

@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 
 import { ok } from '@/lib/api/envelope';
 import { AUTH_SESSION_COOKIE } from '@/lib/auth/constants';
-import { deleteSession } from '@/lib/server/in-memory-store';
+import { deleteSession, prepareAuthStore } from '@/lib/server/auth-store';
 
 export async function POST(request: Request) {
+  await prepareAuthStore();
   const cookieHeader = request.headers.get('cookie') || '';
   const sessionToken = cookieHeader
     .split(';')
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
     .find((chunk) => chunk.startsWith(`${AUTH_SESSION_COOKIE}=`))
     ?.split('=')[1];
 
-  deleteSession(sessionToken);
+  await deleteSession(sessionToken);
 
   const response = NextResponse.json(ok({ loggedOut: true }));
   response.cookies.set(AUTH_SESSION_COOKIE, '', {
