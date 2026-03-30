@@ -7,10 +7,11 @@ import DataTable, { DataTableColumn } from '@/components/table/data-table';
 import StatusBadge from '@/components/badges/status-badge';
 import LoadingSkeleton from '@/components/states/loading-skeleton';
 import { mockDashboardMetrics, mockSalesTransactions } from '@/lib/mock-data';
+import { getCeoDashboardData } from '@/lib/api/client';
 import { formatCurrency, formatNumber, formatDate, formatQuantity } from '@/lib/utils/formatting';
 import { Button } from '@/components/ui/button';
 import { SalesTransaction } from '@/lib/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   BarChart3,
   TrendingUp,
@@ -20,9 +21,28 @@ import {
 } from 'lucide-react';
 
 export default function CEODashboardPage() {
-  const [loading] = useState(false);
-  const metrics = mockDashboardMetrics;
-  const salesData = mockSalesTransactions;
+  const [loading, setLoading] = useState(true);
+  const [metrics, setMetrics] = useState(mockDashboardMetrics);
+  const [salesData, setSalesData] = useState(mockSalesTransactions);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDashboard() {
+      const payload = await getCeoDashboardData();
+      if (!isMounted) return;
+
+      setMetrics(payload.metrics);
+      setSalesData(payload.salesTransactions);
+      setLoading(false);
+    }
+
+    void loadDashboard();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // KPI Cards Config
   const kpiCards = [

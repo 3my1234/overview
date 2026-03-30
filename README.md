@@ -1,35 +1,40 @@
-# v0-palm-oil-platform-ui
+# Palm Oil Platform UI
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+Next.js application for the Palm Oil operations platform (inventory, sales, accounting, reconciliation, and CEO dashboards).
 
-## Built with v0
+## Current Stage
+- UI scaffold generated with v0
+- Phase 1 foundation in progress (policy config, API skeleton, reusable data client)
+- Implementation tracker: `docs/implementation-tracker.md`
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
-
-[Continue working on v0 →](https://v0.app/chat/projects/prj_lDkDqEsFM6ez3rdW0K8XCr63cgeM)
-
-## Getting Started
-
-First, run the development server:
+## Local Setup
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## API Skeleton (Phase 1)
 
-## Learn More
+Starter endpoints for preview/demo workflows:
+- `GET /api/v1/health`
+- `GET /api/v1/meta/master-data`
+- `GET /api/v1/meta/progress`
+- `GET /api/v1/meta/policy`
+- `PUT /api/v1/meta/policy`
+- `GET /api/v1/dashboard/ceo`
+- `GET /api/v1/inventory/purchases`
+- `GET /api/v1/accounting/journals`
 
-To learn more, take a look at the following resources:
+## Preview Deployment (Coolify)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
+Use your personal VPS/Coolify for preview while waiting for client-owned infrastructure:
+1. Create a new project and app in Coolify from this GitHub repository.
+2. Let Coolify auto-detect Next.js build settings.
+3. Set environment variable `PORT=3000`.
+4. Deploy from `main`.
+5. Share preview URL with client for milestone visibility.
 
-<a href="https://v0.app/chat/api/kiro/clone/3my1234/v0-palm-oil-platform-ui" alt="Open in Kiro"><img src="https://pdgvvgmkdvyeydso.public.blob.vercel-storage.com/open%20in%20kiro.svg?sanitize=true" /></a>
+When client infrastructure is funded and ready, migrate to client-owned server/domain.

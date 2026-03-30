@@ -395,7 +395,7 @@ export const mockReconciliationRecords: ReconciliationRecord[] = [
     variancePercentage: 0,
     varianceValue: 0,
     status: 'reconciled',
-    reconcililedBy: 'user_2',
+    reconciledBy: 'user_2',
     reconciliationDate: new Date('2024-03-28'),
   },
 ];

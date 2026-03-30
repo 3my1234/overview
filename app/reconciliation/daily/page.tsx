@@ -108,7 +108,7 @@ export default function DailyReconciliationPage() {
                 variancePercentage={record.variancePercentage}
                 status={record.status}
                 notes={record.notes}
-                reconciliedBy={record.reconcililedBy}
+                reconciledBy={record.reconciledBy}
                 reconciliationDate={record.reconciliationDate}
               />
             );

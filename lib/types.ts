@@ -121,7 +121,7 @@ export interface ReconciliationRecord {
   varianceValue: number;
   status: 'pending' | 'reconciled' | 'investigation';
   notes?: string;
-  reconcililedBy?: string;
+  reconciledBy?: string;
   reconciliationDate?: Date;
 }
 

@@ -6,18 +6,40 @@ import DataTable, { DataTableColumn } from '@/components/table/data-table';
 import FilterBar, { FilterConfig } from '@/components/filters/filter-bar';
 import StatusBadge from '@/components/badges/status-badge';
 import { mockStockMovements, mockWarehouses, mockProducts } from '@/lib/mock-data';
+import { getMasterData, getPurchases } from '@/lib/api/client';
 import { formatDate, formatCurrency, formatNumber, formatQuantity } from '@/lib/utils/formatting';
 import { StockMovement } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function PurchasesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({});
+  const [purchases, setPurchases] = useState<StockMovement[]>(
+    mockStockMovements.filter((movement) => movement.type === 'purchase')
+  );
+  const [warehouses, setWarehouses] = useState(mockWarehouses);
+  const [products, setProducts] = useState(mockProducts);
 
-  // Filter purchases only
-  const purchaseMovements = mockStockMovements.filter(m => m.type === 'purchase');
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadData() {
+      const [purchasesData, masterData] = await Promise.all([getPurchases(), getMasterData()]);
+      if (!isMounted) return;
+
+      setPurchases(purchasesData);
+      setWarehouses(masterData.warehouses);
+      setProducts(masterData.products);
+    }
+
+    void loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Filter configs
   const filterConfigs: FilterConfig[] = [
@@ -26,7 +48,7 @@ export default function PurchasesPage() {
       label: 'Warehouse',
       placeholder: 'All Warehouses',
       key: 'warehouseId',
-      options: mockWarehouses.map(w => ({
+      options: warehouses.map(w => ({
         id: w.id,
         label: w.name,
         value: w.id,
@@ -45,7 +67,7 @@ export default function PurchasesPage() {
   ];
 
   // Filtered data
-  const filteredPurchases = purchaseMovements.filter(movement => {
+  const filteredPurchases = purchases.filter(movement => {
     const matchesSearch =
       !searchTerm ||
       movement.referenceDocument.toLowerCase().includes(searchTerm.toLowerCase());
@@ -72,7 +94,7 @@ export default function PurchasesPage() {
     {
       key: 'productId',
       label: 'Product',
-      render: (value) => mockProducts.find(p => p.id === value)?.name || value,
+      render: (value) => products.find(p => p.id === value)?.name || value,
     },
     {
       key: 'quantity',

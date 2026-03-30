@@ -6,15 +6,33 @@ import DataTable, { DataTableColumn } from '@/components/table/data-table';
 import FilterBar, { FilterConfig } from '@/components/filters/filter-bar';
 import StatusBadge from '@/components/badges/status-badge';
 import { mockJournalEntries } from '@/lib/mock-data';
+import { getJournalEntries } from '@/lib/api/client';
 import { formatDate, formatCurrency } from '@/lib/utils/formatting';
 import { JournalEntry } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Plus, Eye } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function JournalsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({});
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(mockJournalEntries);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadJournals() {
+      const payload = await getJournalEntries();
+      if (!isMounted) return;
+      setJournalEntries(payload);
+    }
+
+    void loadJournals();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Filter configs
   const filterConfigs: FilterConfig[] = [
@@ -38,7 +56,7 @@ export default function JournalsPage() {
   ];
 
   // Filtered data
-  const filteredEntries = mockJournalEntries.filter(entry => {
+  const filteredEntries = journalEntries.filter(entry => {
     const matchesSearch =
       !searchTerm ||
       entry.journalNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||

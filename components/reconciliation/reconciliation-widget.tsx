@@ -14,7 +14,7 @@ interface ReconciliationWidgetProps {
   variancePercentage?: number;
   status: 'reconciled' | 'pending' | 'investigation';
   notes?: string;
-  reconciliedBy?: string;
+  reconciledBy?: string;
   reconciliationDate?: Date;
 }
 
@@ -27,7 +27,7 @@ export default function ReconciliationWidget({
   variancePercentage,
   status,
   notes,
-  reconciliedBy,
+  reconciledBy,
   reconciliationDate,
 }: ReconciliationWidgetProps) {
   const computed = {
@@ -93,9 +93,9 @@ export default function ReconciliationWidget({
         <div className="flex items-center gap-2 rounded-lg bg-muted/50 p-3">
           {config.icon}
           <div className="text-sm">
-            {status === 'reconciled' && reconcililedBy && (
+            {status === 'reconciled' && reconciledBy && (
               <p>
-                Reconciled by <span className="font-medium">{reconciliedBy}</span>
+                Reconciled by <span className="font-medium">{reconciledBy}</span>
                 {reconciliationDate && ` on ${reconciliationDate.toLocaleDateString()}`}
               </p>
             )}
