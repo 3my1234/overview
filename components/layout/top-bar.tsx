@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Menu, Bell, User, LogOut, Settings, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +21,8 @@ interface TopBarProps {
 }
 
 export default function TopBar({ onMenuClick, userName, userRole, onLogout }: TopBarProps) {
+  const settingsHref = userRole === 'super_admin' ? '/settings/security' : '/settings/users';
+
   return (
     <header className="border-b border-border bg-card">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -95,9 +98,11 @@ export default function TopBar({ onMenuClick, userName, userRole, onLogout }: To
                 </div>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
+              <DropdownMenuItem asChild>
+                <Link href={settingsHref} className="flex items-center">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <HelpCircle className="h-4 w-4 mr-2" />
