@@ -1,13 +1,47 @@
 // Role and User Types
-export type Role = 'admin' | 'warehouse_manager' | 'sales_manager' | 'accountant' | 'ceo' | 'auditor';
+export type Role =
+  | 'super_admin'
+  | 'admin'
+  | 'warehouse_manager'
+  | 'sales_manager'
+  | 'accountant'
+  | 'ceo'
+  | 'auditor'
+  | 'worker';
 
 export interface User {
   id: string;
   name: string;
+  username: string;
   email: string;
   role: Role;
   warehouse?: string;
   branch?: string;
+  workerId?: string;
+  status: 'active' | 'inactive';
+  createdAt: Date;
+}
+
+export interface Worker {
+  id: string;
+  employeeCode: string;
+  fullName: string;
+  roleTitle: string;
+  department: string;
+  phone: string;
+  email?: string;
+  address: string;
+  nextOfKinName: string;
+  nextOfKinPhone: string;
+  hireDate: Date;
+  employmentType: 'full_time' | 'contract' | 'casual';
+  locationType: 'warehouse' | 'branch' | 'hq';
+  locationId?: string;
+  monthlySalary?: number;
+  bankName?: string;
+  bankAccountNumber?: string;
+  governmentIdType?: 'nin' | 'voters_card' | 'drivers_license' | 'passport';
+  governmentIdNumber?: string;
   status: 'active' | 'inactive';
   createdAt: Date;
 }
@@ -315,4 +349,13 @@ export const STOCK_MOVEMENT_TYPES = ['purchase', 'sale', 'adjustment', 'transfer
 export const TRANSACTION_STATUSES = ['draft', 'submitted', 'approved', 'posted'] as const;
 export const APPROVAL_STATUSES = ['pending', 'approved', 'rejected'] as const;
 export const ACCOUNT_TYPES = ['asset', 'liability', 'equity', 'revenue', 'expense'] as const;
-export const ROLES = ['admin', 'warehouse_manager', 'sales_manager', 'accountant', 'ceo', 'auditor'] as const;
+export const ROLES = [
+  'super_admin',
+  'admin',
+  'warehouse_manager',
+  'sales_manager',
+  'accountant',
+  'ceo',
+  'auditor',
+  'worker',
+] as const;

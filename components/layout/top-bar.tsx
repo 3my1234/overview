@@ -10,12 +10,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { ROLE_LABELS } from '@/lib/constants';
 
 interface TopBarProps {
   onMenuClick: () => void;
+  userName?: string;
+  userRole?: string;
+  onLogout?: () => void;
 }
 
-export default function TopBar({ onMenuClick }: TopBarProps) {
+export default function TopBar({ onMenuClick, userName, userRole, onLogout }: TopBarProps) {
   return (
     <header className="border-b border-border bg-card">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -84,8 +88,10 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
             <DropdownMenuContent align="end">
               <DropdownMenuItem>
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium">John Doe</p>
-                  <p className="text-xs text-muted-foreground">CEO</p>
+                  <p className="text-sm font-medium">{userName || 'User'}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {ROLE_LABELS[userRole || ''] || userRole || 'Role'}
+                  </p>
                 </div>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -98,7 +104,7 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
                 Help & Support
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={onLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </DropdownMenuItem>

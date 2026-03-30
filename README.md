@@ -19,6 +19,9 @@ Open `http://localhost:3000`.
 ## API Skeleton (Phase 1)
 
 Starter endpoints for preview/demo workflows:
+- `POST /api/v1/auth/login`
+- `GET /api/v1/auth/me`
+- `POST /api/v1/auth/logout`
 - `GET /api/v1/health`
 - `GET /api/v1/meta/master-data`
 - `GET /api/v1/meta/progress`
@@ -27,6 +30,15 @@ Starter endpoints for preview/demo workflows:
 - `GET /api/v1/dashboard/ceo`
 - `GET /api/v1/inventory/purchases`
 - `GET /api/v1/accounting/journals`
+- `GET /api/v1/settings/workers`
+- `POST /api/v1/settings/workers`
+
+## Bootstrap Login (Preview)
+
+First super admin user is seeded for initial access:
+- Username: `martin.obaze`
+- Email: `martin@palmcorp.com`
+- Password: `Palm@123`
 
 ## Preview Deployment (Coolify)
 

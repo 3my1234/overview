@@ -1,5 +1,5 @@
 import {
-  User, Warehouse, Branch, Product, StockMovement, SalesTransaction,
+  User, Worker, Warehouse, Branch, Product, StockMovement, SalesTransaction,
   ReconciliationRecord, Account, JournalEntry, GeneralLedger, TrialBalance,
   DashboardMetrics, AuditLog, StockLedger, OperationalMetrics, Role
 } from './types';
@@ -8,15 +8,26 @@ import {
 export const mockUsers: User[] = [
   {
     id: 'user_1',
-    name: 'John Doe',
-    email: 'john@palmcorp.com',
-    role: 'ceo',
+    name: 'Martin Obaze',
+    username: 'martin.obaze',
+    email: 'martin@palmcorp.com',
+    role: 'super_admin',
     status: 'active',
     createdAt: new Date('2023-01-15'),
   },
   {
+    id: 'user_6',
+    name: 'Operations Admin',
+    username: 'ops.admin',
+    email: 'admin@palmcorp.com',
+    role: 'admin',
+    status: 'active',
+    createdAt: new Date('2023-01-18'),
+  },
+  {
     id: 'user_2',
     name: 'Sarah Johnson',
+    username: 'sarah.johnson',
     email: 'sarah@palmcorp.com',
     role: 'warehouse_manager',
     warehouse: 'warehouse_1',
@@ -26,6 +37,7 @@ export const mockUsers: User[] = [
   {
     id: 'user_3',
     name: 'Mike Chen',
+    username: 'mike.chen',
     email: 'mike@palmcorp.com',
     role: 'sales_manager',
     branch: 'branch_1',
@@ -35,6 +47,7 @@ export const mockUsers: User[] = [
   {
     id: 'user_4',
     name: 'Emma Wilson',
+    username: 'emma.wilson',
     email: 'emma@palmcorp.com',
     role: 'accountant',
     status: 'active',
@@ -43,10 +56,61 @@ export const mockUsers: User[] = [
   {
     id: 'user_5',
     name: 'David Kumar',
+    username: 'david.kumar',
     email: 'david@palmcorp.com',
     role: 'auditor',
     status: 'active',
     createdAt: new Date('2023-04-01'),
+  },
+];
+
+// Mock Workers (employees managed by super admin/admin)
+export const mockWorkers: Worker[] = [
+  {
+    id: 'worker_1',
+    employeeCode: 'WRK-0001',
+    fullName: 'Adewale Okafor',
+    roleTitle: 'Warehouse Assistant',
+    department: 'Operations',
+    phone: '+2348012345678',
+    email: 'adewale.okafor@palmcorp.com',
+    address: '12 Palm Road, Benin City, Edo State',
+    nextOfKinName: 'Kemi Okafor',
+    nextOfKinPhone: '+2348098765432',
+    hireDate: new Date('2024-01-10'),
+    employmentType: 'full_time',
+    locationType: 'warehouse',
+    locationId: 'warehouse_1',
+    monthlySalary: 180000,
+    bankName: 'GTBank',
+    bankAccountNumber: '0123456789',
+    governmentIdType: 'nin',
+    governmentIdNumber: '70123456789',
+    status: 'active',
+    createdAt: new Date('2024-01-10'),
+  },
+  {
+    id: 'worker_2',
+    employeeCode: 'WRK-0002',
+    fullName: 'Chinwe Eze',
+    roleTitle: 'Sales Clerk',
+    department: 'Sales',
+    phone: '+2348022223344',
+    email: 'chinwe.eze@palmcorp.com',
+    address: '8 Market Street, Asaba, Delta State',
+    nextOfKinName: 'Ifeanyi Eze',
+    nextOfKinPhone: '+2348030001122',
+    hireDate: new Date('2024-02-04'),
+    employmentType: 'full_time',
+    locationType: 'branch',
+    locationId: 'branch_1',
+    monthlySalary: 150000,
+    bankName: 'Access Bank',
+    bankAccountNumber: '0011223344',
+    governmentIdType: 'voters_card',
+    governmentIdNumber: 'PVC-1145228',
+    status: 'active',
+    createdAt: new Date('2024-02-04'),
   },
 ];
 
@@ -484,6 +548,7 @@ export const mockDashboardMetrics: DashboardMetrics = {
 export function getMockDataByType<T>(type: string): T[] {
   const dataMap: Record<string, any> = {
     users: mockUsers,
+    workers: mockWorkers,
     warehouses: mockWarehouses,
     branches: mockBranches,
     products: mockProducts,

@@ -33,3 +33,13 @@ Last updated: 2026-03-30
   - `dashboard/ceo`
   - `inventory/purchases`
   - `accounting/journals`
+
+## Added in current admin update pass
+- Added `super_admin` and `worker` role support in domain constants/types
+- Added worker employee data model for professional HR-style records
+- Added worker management screen: `settings/workers` (create + list)
+- Added worker API endpoint: `GET/POST /api/v1/settings/workers`
+- Updated menu access so super admin/admin can manage workers
+- Added login flow scaffold (`/auth/login`) and session-backed API auth endpoints
+- Added protected routing middleware for authenticated app access
+- Added user management API for super admin/admin to create login credentials

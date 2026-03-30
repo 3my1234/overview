@@ -29,22 +29,26 @@ export const ACCOUNT_TYPES = {
 } as const;
 
 export const ROLES = {
+  SUPER_ADMIN: 'super_admin',
   ADMIN: 'admin',
   WAREHOUSE_MANAGER: 'warehouse_manager',
   SALES_MANAGER: 'sales_manager',
   ACCOUNTANT: 'accountant',
   CEO: 'ceo',
   AUDITOR: 'auditor',
+  WORKER: 'worker',
 } as const;
 
 // Role Labels
 export const ROLE_LABELS: Record<string, string> = {
+  super_admin: 'Super Admin',
   admin: 'Administrator',
   warehouse_manager: 'Warehouse Manager',
   sales_manager: 'Sales Manager',
   accountant: 'Accountant',
   ceo: 'CEO',
   auditor: 'Auditor',
+  worker: 'Worker',
 };
 
 // Status Labels
@@ -77,6 +81,25 @@ export const STATUS_COLORS: Record<string, string> = {
 
 // Navigation Menu Items by Role
 export const ROLE_BASED_MENU = {
+  super_admin: [
+    { label: 'Dashboard', href: '/dashboard', icon: 'BarChart3' },
+    { label: 'Users', href: '/settings/users', icon: 'Settings' },
+    { label: 'Workers', href: '/settings/workers', icon: 'Briefcase' },
+    { label: 'Inventory', href: '/inventory', icon: 'Package' },
+    { label: 'Sales', href: '/sales', icon: 'ShoppingCart' },
+    { label: 'Accounting', href: '/accounting', icon: 'Calculator' },
+    { label: 'Reports', href: '/reports', icon: 'FileText' },
+    { label: 'Audit', href: '/audit', icon: 'Eye' },
+  ],
+  admin: [
+    { label: 'Dashboard', href: '/dashboard', icon: 'BarChart3' },
+    { label: 'Users', href: '/settings/users', icon: 'Settings' },
+    { label: 'Workers', href: '/settings/workers', icon: 'Briefcase' },
+    { label: 'Inventory', href: '/inventory', icon: 'Package' },
+    { label: 'Sales', href: '/sales', icon: 'ShoppingCart' },
+    { label: 'Accounting', href: '/accounting', icon: 'Calculator' },
+    { label: 'Reports', href: '/reports', icon: 'FileText' },
+  ],
   ceo: [
     { label: 'Dashboard', href: '/dashboard/ceo', icon: 'BarChart3' },
     { label: 'Inventory', href: '/inventory', icon: 'Package' },
@@ -85,7 +108,8 @@ export const ROLE_BASED_MENU = {
     { label: 'Reports', href: '/reports', icon: 'FileText' },
     { label: 'Reconciliation', href: '/reconciliation', icon: 'CheckCircle' },
     { label: 'Audit', href: '/audit', icon: 'Eye' },
-    { label: 'Settings', href: '/settings', icon: 'Settings' },
+    { label: 'Users', href: '/settings/users', icon: 'Settings' },
+    { label: 'Workers', href: '/settings/workers', icon: 'Briefcase' },
   ],
   warehouse_manager: [
     { label: 'Dashboard', href: '/dashboard', icon: 'Package' },
@@ -112,6 +136,13 @@ export const ROLE_BASED_MENU = {
   auditor: [
     { label: 'Audit Logs', href: '/audit/logs', icon: 'Eye' },
     { label: 'Reports', href: '/reports/financial', icon: 'FileText' },
+  ],
+  worker: [
+    { label: 'Dashboard', href: '/dashboard', icon: 'BarChart3' },
+    { label: 'Purchases', href: '/inventory/purchases', icon: 'TrendingDown' },
+    { label: 'Transfers', href: '/inventory/transfers', icon: 'ArrowRightLeft' },
+    { label: 'Sales Entry', href: '/sales/transactions', icon: 'ShoppingCart' },
+    { label: 'Reconciliation', href: '/reconciliation/daily', icon: 'CheckCircle' },
   ],
 };
 
