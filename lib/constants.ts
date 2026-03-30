@@ -88,7 +88,7 @@ export const ROLE_BASED_MENU = {
     { label: 'Settings', href: '/settings', icon: 'Settings' },
   ],
   warehouse_manager: [
-    { label: 'Dashboard', href: '/dashboard/warehouse', icon: 'Package' },
+    { label: 'Dashboard', href: '/dashboard', icon: 'Package' },
     { label: 'Products', href: '/inventory/products', icon: 'Package' },
     { label: 'Stock Ledger', href: '/inventory/stock-ledger', icon: 'BookOpen' },
     { label: 'Purchases', href: '/inventory/purchases', icon: 'TrendingDown' },
@@ -96,7 +96,7 @@ export const ROLE_BASED_MENU = {
     { label: 'Reconciliation', href: '/reconciliation/daily', icon: 'CheckCircle' },
   ],
   sales_manager: [
-    { label: 'Dashboard', href: '/dashboard/sales', icon: 'ShoppingCart' },
+    { label: 'Dashboard', href: '/dashboard', icon: 'ShoppingCart' },
     { label: 'Transactions', href: '/sales/transactions', icon: 'FileText' },
     { label: 'Daily Summary', href: '/sales/daily-summary', icon: 'BarChart3' },
   ],
