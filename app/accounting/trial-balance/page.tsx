@@ -1,18 +1,38 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import AppShell from '@/components/layout/app-shell';
 import PageHeader from '@/components/layout/page-header';
 import DataTable, { DataTableColumn } from '@/components/table/data-table';
-import { mockTrialBalance, mockAccounts } from '@/lib/mock-data';
+import { getTrialBalance } from '@/lib/api/client';
 import { formatCurrency } from '@/lib/utils/formatting';
 import { TrialBalance } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 
 export default function TrialBalancePage() {
+  const [trialBalance, setTrialBalance] = useState<TrialBalance[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadTrialBalance() {
+      const payload = await getTrialBalance();
+      if (!isMounted) return;
+      setTrialBalance(payload);
+    }
+
+    void loadTrialBalance();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Calculate totals
-  const totalDebits = mockTrialBalance.reduce((sum, item) => sum + item.debit, 0);
-  const totalCredits = mockTrialBalance.reduce((sum, item) => sum + item.credit, 0);
+  const totalDebits = trialBalance.reduce((sum, item) => sum + item.debit, 0);
+  const totalCredits = trialBalance.reduce((sum, item) => sum + item.credit, 0);
   const difference = totalDebits - totalCredits;
 
   // Table columns
@@ -74,7 +94,7 @@ export default function TrialBalancePage() {
         {/* Trial Balance Table */}
         <DataTable<TrialBalance>
           columns={columns}
-          data={mockTrialBalance}
+          data={trialBalance}
           pageSize={10}
           showExport={true}
           hover={true}
@@ -119,7 +139,7 @@ export default function TrialBalancePage() {
         {/* Account Type Breakdown */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
           {['asset', 'liability', 'equity', 'revenue', 'expense'].map(type => {
-            const accounts = mockTrialBalance.filter(a => a.accountType === type);
+            const accounts = trialBalance.filter(a => a.accountType === type);
             const totalDebits = accounts.reduce((sum, a) => sum + a.debit, 0);
             const totalCredits = accounts.reduce((sum, a) => sum + a.credit, 0);
             return (

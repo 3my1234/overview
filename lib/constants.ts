@@ -18,6 +18,10 @@ export const STOCK_MOVEMENT_TYPES = {
   ADJUSTMENT: 'adjustment',
   TRANSFER: 'transfer',
   CONSUMPTION: 'consumption',
+  PRODUCTION: 'production',
+  TRANSFER_OUT: 'transfer_out',
+  TRANSFER_IN: 'transfer_in',
+  LEAKAGE: 'leakage',
 } as const;
 
 export const ACCOUNT_TYPES = {
@@ -57,6 +61,9 @@ export const STATUS_LABELS: Record<string, string> = {
   submitted: 'Submitted',
   approved: 'Approved',
   posted: 'Posted',
+  in_transit: 'In Transit',
+  received: 'Received',
+  variance: 'Variance',
   pending: 'Pending',
   rejected: 'Rejected',
   active: 'Active',
@@ -71,6 +78,9 @@ export const STATUS_COLORS: Record<string, string> = {
   submitted: 'bg-blue-100 text-blue-800',
   approved: 'bg-green-100 text-green-800',
   posted: 'bg-emerald-100 text-emerald-800',
+  in_transit: 'bg-blue-100 text-blue-800',
+  received: 'bg-green-100 text-green-800',
+  variance: 'bg-red-100 text-red-800',
   pending: 'bg-amber-100 text-amber-800',
   rejected: 'bg-red-100 text-red-800',
   active: 'bg-green-100 text-green-800',
@@ -115,6 +125,7 @@ export const ROLE_BASED_MENU = {
   warehouse_manager: [
     { label: 'Dashboard', href: '/dashboard', icon: 'Package' },
     { label: 'Products', href: '/inventory/products', icon: 'Package' },
+    { label: 'Production', href: '/inventory/production', icon: 'Factory' },
     { label: 'Stock Ledger', href: '/inventory/stock-ledger', icon: 'BookOpen' },
     { label: 'Purchases', href: '/inventory/purchases', icon: 'TrendingDown' },
     { label: 'Transfers', href: '/inventory/transfers', icon: 'ArrowRightLeft' },
@@ -141,6 +152,7 @@ export const ROLE_BASED_MENU = {
   worker: [
     { label: 'Dashboard', href: '/dashboard', icon: 'BarChart3' },
     { label: 'Purchases', href: '/inventory/purchases', icon: 'TrendingDown' },
+    { label: 'Production', href: '/inventory/production', icon: 'Factory' },
     { label: 'Transfers', href: '/inventory/transfers', icon: 'ArrowRightLeft' },
     { label: 'Sales Entry', href: '/sales/transactions', icon: 'ShoppingCart' },
     { label: 'Reconciliation', href: '/reconciliation/daily', icon: 'CheckCircle' },

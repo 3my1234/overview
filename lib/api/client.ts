@@ -1,4 +1,5 @@
 import { ApiEnvelope } from '@/lib/api/envelope';
+import { ApiEnvelope } from '@/lib/api/envelope';
 import { AccountingPolicyConfig } from '@/lib/domain/policy-config';
 import { ProjectProgress } from '@/lib/domain/project-tracker';
 import {
@@ -13,7 +14,7 @@ import {
   mockWarehouses,
   mockWorkers,
 } from '@/lib/mock-data';
-import { JournalEntry, Role, SalesTransaction, StockMovement, User, Worker } from '@/lib/types';
+import { JournalEntry, Product, Role, SalesTransaction, StockMovement, TrialBalance, User, Worker } from '@/lib/types';
 
 const API_BASE = '/api/v1';
 
@@ -29,6 +30,64 @@ interface MasterDataBundle {
 interface CEODashboardBundle {
   metrics: typeof mockDashboardMetrics;
   salesTransactions: SalesTransaction[];
+  analytics: DashboardAnalytics;
+}
+
+export interface DashboardAnalytics {
+  salesTrend: Array<{ period: string; sales: number; quantity: number }>;
+  revenueVsCogs: Array<{ period: string; revenue: number; cogs: number; grossProfit: number }>;
+  stockByLocation: Array<{ category: string; warehouse: number; branch: number; inTransit: number }>;
+  transferVariance: Array<{ route: string; sent: number; received: number; variance: number }>;
+  leakageTrend: Array<{ period: string; quantityLost: number; valueLost: number }>;
+  packagingEfficiency: Array<{ period: string; expected: number; actual: number; variance: number }>;
+  productProfitability: Array<{
+    product: string;
+    revenue: number;
+    cogs: number;
+    margin: number;
+    marginPct: number;
+  }>;
+  pnlBridge: Array<{ step: string; value: number }>;
+  expenseBreakdown: Array<{ category: string; amount: number }>;
+  assetBankTrend: Array<{ period: string; assets: number; bank: number }>;
+}
+
+export interface AdminCostSummary {
+  id: string;
+  code: string;
+  name: string;
+  totalAmount: number;
+}
+
+export interface AssetRecord {
+  id: string;
+  assetCode: string;
+  name: string;
+  category: string;
+  acquiredDate: Date;
+  acquisitionCost: number;
+  usefulLifeYears: number;
+  status: 'active' | 'inactive';
+}
+
+export interface TransferLineRecord {
+  id: string;
+  productId: string;
+  quantitySent: number;
+  quantityReceived: number;
+  varianceQuantity: number;
+  unitCost: number;
+}
+
+export interface TransferRecord {
+  id: string;
+  transferNumber: string;
+  date: Date;
+  fromWarehouseId: string;
+  toBranchId: string;
+  status: 'in_transit' | 'received' | 'variance';
+  createdBy: string;
+  lines: TransferLineRecord[];
 }
 
 export interface CurrentUser {
@@ -67,6 +126,42 @@ async function fetchWithFallback<T>(path: string, fallbackData: T): Promise<T> {
   } catch {
     return fallbackData;
   }
+}
+
+async function postJson<T>(path: string, payload: unknown, errorCode: string): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(errorCode);
+  }
+
+  const envelope = (await response.json()) as ApiEnvelope<T>;
+  if (!envelope.success || !envelope.data) {
+    throw new Error(envelope.error || errorCode);
+  }
+
+  return envelope.data;
+}
+
+function defaultDashboardAnalytics(): DashboardAnalytics {
+  return {
+    salesTrend: [],
+    revenueVsCogs: [],
+    stockByLocation: [],
+    transferVariance: [],
+    leakageTrend: [],
+    packagingEfficiency: [],
+    productProfitability: [],
+    pnlBridge: [],
+    expenseBreakdown: [],
+    assetBankTrend: [],
+  };
 }
 
 export async function getMasterData(): Promise<MasterDataBundle> {
@@ -122,6 +217,7 @@ export async function getCeoDashboardData(): Promise<CEODashboardBundle> {
   return fetchWithFallback('/dashboard/ceo', {
     metrics: mockDashboardMetrics,
     salesTransactions: mockSalesTransactions,
+    analytics: defaultDashboardAnalytics(),
   });
 }
 
@@ -130,8 +226,132 @@ export async function getPurchases(): Promise<StockMovement[]> {
   return fetchWithFallback('/inventory/purchases', fallback);
 }
 
+export async function createPurchase(payload: {
+  date?: string;
+  productId: string;
+  warehouseId: string;
+  quantity: number;
+  unitCost: number;
+  referenceDocument?: string;
+}): Promise<StockMovement> {
+  return postJson('/inventory/purchases', payload, 'create_purchase_failed');
+}
+
+export async function getProducts(): Promise<Product[]> {
+  return fetchWithFallback('/inventory/products', mockProducts);
+}
+
+export async function createProduct(payload: {
+  name: string;
+  sku: string;
+  category: 'raw_oil' | 'packaging' | 'consumable' | 'finished_goods' | 'other';
+  unit: 'litres' | 'drums' | 'tonnes' | 'bags';
+  unitPrice: number;
+  standardCost: number;
+  reorderLevel: number;
+  status?: 'active' | 'discontinued';
+}): Promise<Product> {
+  return postJson('/inventory/products', payload, 'create_product_failed');
+}
+
+export async function getProductionRecords(): Promise<StockMovement[]> {
+  return fetchWithFallback('/inventory/production', []);
+}
+
+export async function createProduction(payload: {
+  date?: string;
+  warehouseId: string;
+  outputProductId: string;
+  outputQuantity: number;
+  overheadCost?: number;
+  referenceDocument?: string;
+}): Promise<StockMovement> {
+  return postJson('/inventory/production', payload, 'create_production_failed');
+}
+
+export async function getTransfers(): Promise<TransferRecord[]> {
+  return fetchWithFallback('/inventory/transfers', []);
+}
+
+export async function createTransfer(payload: {
+  date?: string;
+  fromWarehouseId: string;
+  toBranchId: string;
+  notes?: string;
+  lines: Array<{ productId: string; quantity: number; unitCost?: number }>;
+}): Promise<TransferRecord> {
+  return postJson('/inventory/transfers', payload, 'create_transfer_failed');
+}
+
+export async function receiveTransfer(payload: {
+  transferId: string;
+  lines: Array<{ lineId: string; quantityReceived: number }>;
+}): Promise<TransferRecord> {
+  return postJson('/inventory/transfers/receive', payload, 'receive_transfer_failed');
+}
+
 export async function getJournalEntries(): Promise<JournalEntry[]> {
   return fetchWithFallback('/accounting/journals', mockJournalEntries);
+}
+
+export async function getTrialBalance(): Promise<TrialBalance[]> {
+  return fetchWithFallback('/accounting/trial-balance', []);
+}
+
+export async function getSalesTransactions(): Promise<SalesTransaction[]> {
+  return fetchWithFallback('/sales/transactions', mockSalesTransactions);
+}
+
+export async function createSalesTransaction(payload: {
+  date?: string;
+  customerName: string;
+  warehouseId: string;
+  branchId: string;
+  status?: 'draft' | 'submitted' | 'approved' | 'posted';
+  items: Array<{ productId: string; quantity: number; unitPrice?: number }>;
+}): Promise<SalesTransaction> {
+  return postJson('/sales/transactions', payload, 'create_sales_failed');
+}
+
+export async function getAdminCostSummaries(): Promise<AdminCostSummary[]> {
+  const fallback: AdminCostSummary[] = [
+    { id: 'adm_salary', code: 'ADM-001', name: 'Salaries and Wages', totalAmount: 0 },
+    { id: 'adm_paye', code: 'ADM-002', name: 'PAYE and Deductions', totalAmount: 0 },
+    { id: 'adm_transport', code: 'ADM-003', name: 'Transportation', totalAmount: 0 },
+    { id: 'adm_courier', code: 'ADM-004', name: 'Courier Services', totalAmount: 0 },
+    { id: 'adm_loading', code: 'ADM-005', name: 'Loading/Offloading Costs', totalAmount: 0 },
+    { id: 'adm_levies', code: 'ADM-006', name: 'Levies', totalAmount: 0 },
+    { id: 'adm_registration', code: 'ADM-007', name: 'Registration', totalAmount: 0 },
+    { id: 'adm_rent', code: 'ADM-008', name: 'Rent/Occupancy', totalAmount: 0 },
+    { id: 'adm_consultancy', code: 'ADM-009', name: 'Consultancy Costs', totalAmount: 0 },
+    { id: 'adm_legal', code: 'ADM-010', name: 'Legal Costs', totalAmount: 0 },
+  ];
+
+  return fetchWithFallback('/accounting/admin-costs', fallback);
+}
+
+export async function createAdminCost(payload: {
+  date?: string;
+  code: string;
+  description: string;
+  amount: number;
+}): Promise<AdminCostSummary> {
+  return postJson('/accounting/admin-costs', payload, 'create_admin_cost_failed');
+}
+
+export async function getAssets(): Promise<AssetRecord[]> {
+  return fetchWithFallback('/accounting/assets', []);
+}
+
+export async function createAsset(payload: {
+  assetCode: string;
+  name: string;
+  category: string;
+  acquiredDate?: string;
+  acquisitionCost: number;
+  usefulLifeYears: number;
+}): Promise<AssetRecord> {
+  return postJson('/accounting/assets', payload, 'create_asset_failed');
 }
 
 export async function getWorkers(): Promise<Worker[]> {

@@ -1,8 +1,21 @@
 import { NextResponse } from 'next/server';
 
 import { ok } from '@/lib/api/envelope';
-import { getMasterData } from '@/lib/server/in-memory-store';
+import { getUsers, getWorkers, prepareAuthStore } from '@/lib/server/auth-store';
+import { getMasterDataBundle } from '@/lib/server/erp-store';
 
 export async function GET() {
-  return NextResponse.json(ok(getMasterData()));
+  await prepareAuthStore();
+  const [users, workers, erp] = await Promise.all([getUsers(), getWorkers(), getMasterDataBundle()]);
+
+  return NextResponse.json(
+    ok({
+      users,
+      workers,
+      warehouses: erp.warehouses,
+      branches: erp.branches,
+      products: erp.products,
+      accounts: [],
+    })
+  );
 }

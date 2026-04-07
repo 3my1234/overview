@@ -4,14 +4,14 @@ import { z } from 'zod';
 import { fail, ok } from '@/lib/api/envelope';
 import { AUTH_SESSION_COOKIE } from '@/lib/auth/constants';
 import { getSessionUser, prepareAuthStore } from '@/lib/server/auth-store';
-import { createPurchase, listPurchases } from '@/lib/server/erp-store';
+import { createProduction, listProductionRecords } from '@/lib/server/erp-store';
 
-const createPurchaseSchema = z.object({
+const productionSchema = z.object({
   date: z.string().optional(),
-  productId: z.string().min(2),
   warehouseId: z.string().min(2),
-  quantity: z.number().positive(),
-  unitCost: z.number().positive(),
+  outputProductId: z.string().min(2),
+  outputQuantity: z.number().positive(),
+  overheadCost: z.number().nonnegative().optional(),
   referenceDocument: z.string().optional(),
 });
 
@@ -25,7 +25,7 @@ function readSessionToken(request: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json(ok(await listPurchases()));
+  return NextResponse.json(ok(await listProductionRecords()));
 }
 
 export async function POST(request: Request) {
@@ -42,24 +42,44 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const parsed = createPurchaseSchema.safeParse(body);
+    const parsed = productionSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json(fail('invalid_payload', parsed.error.message), { status: 400 });
     }
 
-    const purchase = await createPurchase({
+    const production = await createProduction({
       ...parsed.data,
       actorUserId: actor.id,
     });
 
-    return NextResponse.json(ok(purchase, 'Purchase recorded successfully.'), { status: 201 });
+    return NextResponse.json(ok(production, 'Production posted successfully.'), { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'purchase_failed';
-    if (message === 'product_not_found') {
-      return NextResponse.json(fail('product_not_found', 'Product not found.'), { status: 404 });
+    const message = error instanceof Error ? error.message : 'production_failed';
+
+    if (message === 'output_product_not_found') {
+      return NextResponse.json(fail('output_product_not_found', 'Output product not found.'), {
+        status: 404,
+      });
     }
 
-    return NextResponse.json(fail('purchase_failed', 'Unable to record purchase.'), { status: 400 });
+    if (message === 'bom_not_configured') {
+      return NextResponse.json(
+        fail('bom_not_configured', 'No active BOM recipe configured for this product.'),
+        { status: 400 }
+      );
+    }
+
+    if (message.startsWith('insufficient_component:')) {
+      const component = message.split(':')[1] || 'component';
+      return NextResponse.json(
+        fail('insufficient_component', `Insufficient component stock for ${component}.`),
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(fail('production_failed', 'Unable to post production.'), {
+      status: 400,
+    });
   }
 }

@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server';
 
 import { ok } from '@/lib/api/envelope';
-import { mockDashboardMetrics, mockSalesTransactions } from '@/lib/mock-data';
+import { getCeoDashboardData } from '@/lib/server/erp-store';
 
 export async function GET() {
-  return NextResponse.json(
-    ok({
-      metrics: mockDashboardMetrics,
-      salesTransactions: mockSalesTransactions.slice(0, 12),
-    })
-  );
+  return NextResponse.json(ok(await getCeoDashboardData()));
 }

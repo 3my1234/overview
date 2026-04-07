@@ -4,15 +4,13 @@ import { z } from 'zod';
 import { fail, ok } from '@/lib/api/envelope';
 import { AUTH_SESSION_COOKIE } from '@/lib/auth/constants';
 import { getSessionUser, prepareAuthStore } from '@/lib/server/auth-store';
-import { createPurchase, listPurchases } from '@/lib/server/erp-store';
+import { createAdminCost, listAdminCostSummaries } from '@/lib/server/erp-store';
 
-const createPurchaseSchema = z.object({
+const adminCostSchema = z.object({
   date: z.string().optional(),
-  productId: z.string().min(2),
-  warehouseId: z.string().min(2),
-  quantity: z.number().positive(),
-  unitCost: z.number().positive(),
-  referenceDocument: z.string().optional(),
+  code: z.string().trim().min(3),
+  description: z.string().trim().min(3),
+  amount: z.number().positive(),
 });
 
 function readSessionToken(request: Request) {
@@ -25,7 +23,7 @@ function readSessionToken(request: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json(ok(await listPurchases()));
+  return NextResponse.json(ok(await listAdminCostSummaries()));
 }
 
 export async function POST(request: Request) {
@@ -36,30 +34,37 @@ export async function POST(request: Request) {
     return NextResponse.json(fail('unauthorized', 'Login required.'), { status: 401 });
   }
 
-  if (!['super_admin', 'admin', 'warehouse_manager', 'worker'].includes(actor.role)) {
+  if (!['super_admin', 'admin', 'accountant'].includes(actor.role)) {
     return NextResponse.json(fail('forbidden', 'Insufficient access level.'), { status: 403 });
   }
 
   try {
     const body = await request.json();
-    const parsed = createPurchaseSchema.safeParse(body);
+    const parsed = adminCostSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json(fail('invalid_payload', parsed.error.message), { status: 400 });
     }
 
-    const purchase = await createPurchase({
+    const record = await createAdminCost({
       ...parsed.data,
       actorUserId: actor.id,
     });
 
-    return NextResponse.json(ok(purchase, 'Purchase recorded successfully.'), { status: 201 });
+    return NextResponse.json(ok(record, 'Administrative cost posted successfully.'), {
+      status: 201,
+    });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'purchase_failed';
-    if (message === 'product_not_found') {
-      return NextResponse.json(fail('product_not_found', 'Product not found.'), { status: 404 });
+    const message = error instanceof Error ? error.message : 'admin_cost_failed';
+
+    if (message === 'expense_code_not_found') {
+      return NextResponse.json(fail('expense_code_not_found', 'Expense code not found.'), {
+        status: 404,
+      });
     }
 
-    return NextResponse.json(fail('purchase_failed', 'Unable to record purchase.'), { status: 400 });
+    return NextResponse.json(fail('admin_cost_failed', 'Unable to post administrative cost.'), {
+      status: 400,
+    });
   }
 }

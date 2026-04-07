@@ -1,19 +1,64 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import AppShell from '@/components/layout/app-shell';
 import PageHeader from '@/components/layout/page-header';
 import SummaryCardsRow from '@/components/cards/summary-cards-row';
-import { mockAccounts } from '@/lib/mock-data';
-import { formatCurrency, formatLabel } from '@/lib/utils/formatting';
+import { AdminCostSummary, createAdminCost, getAdminCostSummaries } from '@/lib/api/client';
+import { formatCurrency } from '@/lib/utils/formatting';
 import { Briefcase, TrendingDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function AdminCostsPage() {
-  // Administrative and operating expenses
-  const adminExpenses = mockAccounts.filter(a => 
-    a.type === 'expense' && (a.code === '5030' || a.code === '5020')
-  );
+  const [adminExpenses, setAdminExpenses] = useState<AdminCostSummary[]>([]);
+  const [form, setForm] = useState({
+    code: '',
+    description: '',
+    amount: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
 
-  const totalAdminCosts = adminExpenses.reduce((sum, a) => sum + a.balance, 0);
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadAdminCosts() {
+      const payload = await getAdminCostSummaries();
+      if (!isMounted) return;
+      setAdminExpenses(payload);
+    }
+
+    void loadAdminCosts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  async function handlePostCost() {
+    if (!form.code || !form.description || !form.amount) return;
+
+    setSubmitting(true);
+    try {
+      const updated = await createAdminCost({
+        code: form.code,
+        description: form.description,
+        amount: Number(form.amount),
+      });
+
+      setAdminExpenses((prev) =>
+        prev.map((item) => (item.id === updated.id ? updated : item))
+      );
+      setForm({ code: '', description: '', amount: '' });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const totalAdminCosts = adminExpenses.reduce((sum, a) => sum + a.totalAmount, 0);
   const avgCost = totalAdminCosts / Math.max(adminExpenses.length, 1);
 
   const kpiCards = [
@@ -43,6 +88,57 @@ export default function AdminCostsPage() {
 
         <SummaryCardsRow cards={kpiCards} />
 
+        <div className="rounded-lg border border-border bg-card p-6">
+          <h2 className="text-xl font-semibold mb-4">Post Administrative Cost</h2>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+            <div className="space-y-2">
+              <Label>Expense Code</Label>
+              <Select
+                value={form.code || 'none'}
+                onValueChange={(value) =>
+                  setForm((prev) => ({ ...prev, code: value === 'none' ? '' : value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select code" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Select code</SelectItem>
+                  {adminExpenses.map((item) => (
+                    <SelectItem key={item.id} value={item.code}>
+                      {item.code} - {item.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                value={form.description}
+                onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
+                placeholder="e.g. April transport support"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="amount">Amount</Label>
+              <Input
+                id="amount"
+                type="number"
+                min="0"
+                value={form.amount}
+                onChange={(event) => setForm((prev) => ({ ...prev, amount: event.target.value }))}
+              />
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end">
+            <Button onClick={() => void handlePostCost()} disabled={submitting}>
+              {submitting ? 'Posting...' : 'Post Cost'}
+            </Button>
+          </div>
+        </div>
+
         {/* Cost Breakdown */}
         <div className="rounded-lg border border-border bg-card p-6">
           <h2 className="text-2xl font-bold mb-6">Cost Categories</h2>
@@ -54,7 +150,7 @@ export default function AdminCostsPage() {
                   <p className="text-xs text-muted-foreground">Code: {expense.code}</p>
                 </div>
                 <p className="text-lg font-bold text-red-600">
-                  {formatCurrency(expense.balance)}
+                  {formatCurrency(expense.totalAmount)}
                 </p>
               </div>
             ))}

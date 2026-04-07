@@ -24,6 +24,7 @@ import {
   Database,
   ChevronDown,
   ChevronUp,
+  Factory,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -51,6 +52,7 @@ const iconMap: Record<string, React.ReactNode> = {
   Scale: <Scale className="h-5 w-5" />,
   List: <List className="h-5 w-5" />,
   Database: <Database className="h-5 w-5" />,
+  Factory: <Factory className="h-5 w-5" />,
 };
 
 export default function Sidebar({ isOpen, onOpenChange, userRole }: SidebarProps) {

@@ -81,7 +81,18 @@ export interface Product {
 export interface StockMovement {
   id: string;
   date: Date;
-  type: 'purchase' | 'sale' | 'adjustment' | 'transfer' | 'consumption';
+  type:
+    | 'purchase'
+    | 'sale'
+    | 'adjustment'
+    | 'transfer'
+    | 'consumption'
+    | 'production'
+    | 'transfer_out'
+    | 'transfer_in'
+    | 'leakage'
+    | 'damage'
+    | 'shrinkage';
   productId: string;
   quantity: number;
   unit: string;
@@ -345,7 +356,19 @@ export interface PaginatedResponse<T> {
 }
 
 // Constants for Statuses
-export const STOCK_MOVEMENT_TYPES = ['purchase', 'sale', 'adjustment', 'transfer', 'consumption'] as const;
+export const STOCK_MOVEMENT_TYPES = [
+  'purchase',
+  'sale',
+  'adjustment',
+  'transfer',
+  'consumption',
+  'production',
+  'transfer_out',
+  'transfer_in',
+  'leakage',
+  'damage',
+  'shrinkage',
+] as const;
 export const TRANSACTION_STATUSES = ['draft', 'submitted', 'approved', 'posted'] as const;
 export const APPROVAL_STATUSES = ['pending', 'approved', 'rejected'] as const;
 export const ACCOUNT_TYPES = ['asset', 'liability', 'equity', 'revenue', 'expense'] as const;

@@ -6,15 +6,33 @@ import DataTable, { DataTableColumn } from '@/components/table/data-table';
 import FilterBar, { FilterConfig } from '@/components/filters/filter-bar';
 import StatusBadge from '@/components/badges/status-badge';
 import { mockProducts } from '@/lib/mock-data';
+import { getProducts } from '@/lib/api/client';
 import { formatCurrency, formatQuantity, formatNumber } from '@/lib/utils/formatting';
 import { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({});
+  const [products, setProducts] = useState<Product[]>(mockProducts);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadProducts() {
+      const payload = await getProducts();
+      if (!isMounted) return;
+      setProducts(payload);
+    }
+
+    void loadProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Filter configs
   const filterConfigs: FilterConfig[] = [
@@ -31,7 +49,7 @@ export default function ProductsPage() {
   ];
 
   // Filtered data
-  const filteredProducts = mockProducts.filter(product => {
+  const filteredProducts = products.filter(product => {
     const matchesSearch =
       !searchTerm ||
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
