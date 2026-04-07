@@ -40,31 +40,31 @@ export default function KPIStatCard({
 
   return (
     <Card
-      className={`cursor-pointer transition-all hover:shadow-lg ${
+      className={`${onClick ? 'cursor-pointer' : 'cursor-default'} transition-all hover:shadow-lg ${
         highlight ? 'border-primary shadow-lg' : ''
       }`}
       onClick={onClick}
     >
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <CardTitle className="pr-2 text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
         {icon && <div className="text-primary">{icon}</div>}
       </CardHeader>
       <CardContent className="space-y-2">
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold tracking-tight">
+        <div className="flex min-w-0 flex-wrap items-baseline gap-2">
+          <span className="max-w-full break-words text-xl font-bold leading-tight tracking-tight sm:text-2xl">
             {value}
           </span>
           {unit && (
-            <span className="text-sm font-medium text-muted-foreground">
+            <span className="text-xs font-medium text-muted-foreground sm:text-sm">
               {unit}
             </span>
           )}
         </div>
 
         {(trend !== undefined || description) && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {trend !== undefined && (
               <div className="flex items-center gap-1">
                 {getTrendIcon()}

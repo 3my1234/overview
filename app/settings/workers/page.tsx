@@ -13,9 +13,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { createWorker, getMasterData, getWorkers } from '@/lib/api/client';
+import { createWorker, getCurrentUser, getMasterData, getWorkers } from '@/lib/api/client';
 import { formatCurrency, formatDate } from '@/lib/utils/formatting';
-import { Worker } from '@/lib/types';
+import { Role, Worker } from '@/lib/types';
 
 interface WorkerFormState {
   employeeCode: string;
@@ -70,17 +70,19 @@ export default function WorkersPage() {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<WorkerFormState>(initialFormState);
+  const [actorRole, setActorRole] = useState<Role | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadData() {
-      const [workersData, masterData] = await Promise.all([getWorkers(), getMasterData()]);
+      const [workersData, masterData, currentUser] = await Promise.all([getWorkers(), getMasterData(), getCurrentUser()]);
       if (!isMounted) return;
 
       setWorkers(workersData);
       setWarehouses(masterData.warehouses.map((warehouse) => ({ id: warehouse.id, name: warehouse.name })));
       setBranches(masterData.branches.map((branch) => ({ id: branch.id, name: branch.name })));
+      setActorRole(currentUser?.role || null);
     }
 
     void loadData();
@@ -190,8 +192,10 @@ export default function WorkersPage() {
     setOpen(false);
   }
 
+  const canManageWorkers = actorRole === 'super_admin' || actorRole === 'admin';
+
   return (
-    <AppShell userRole="super_admin">
+    <AppShell userRole={actorRole || 'admin'}>
       <div className="space-y-6">
         <PageHeader
           title="Worker Management"
@@ -201,17 +205,18 @@ export default function WorkersPage() {
             { label: 'Workers' },
           ]}
           actions={
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Worker
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Create Worker Profile</DialogTitle>
-                </DialogHeader>
+            canManageWorkers ? (
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Worker
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Create Worker Profile</DialogTitle>
+                  </DialogHeader>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
@@ -424,16 +429,17 @@ export default function WorkersPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2">
-                  <Button variant="outline" onClick={() => setOpen(false)} disabled={submitting}>
-                    Cancel
-                  </Button>
-                  <Button onClick={() => void onSubmitWorker()} disabled={submitting}>
-                    {submitting ? 'Saving...' : 'Save Worker'}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+                  <div className="flex justify-end gap-2 pt-2">
+                    <Button variant="outline" onClick={() => setOpen(false)} disabled={submitting}>
+                      Cancel
+                    </Button>
+                    <Button onClick={() => void onSubmitWorker()} disabled={submitting}>
+                      {submitting ? 'Saving...' : 'Save Worker'}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            ) : undefined
           }
         />
 

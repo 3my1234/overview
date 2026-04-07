@@ -99,7 +99,7 @@ export default function TopBar({ onMenuClick, userName, userRole, onLogout }: To
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href={settingsHref} className="flex items-center">
+                <Link href={settingsHref} prefetch={true} scroll={false} className="flex items-center">
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </Link>

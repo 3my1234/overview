@@ -55,6 +55,13 @@ function EmptyChartState() {
   return <p className="text-sm text-muted-foreground">No data yet.</p>;
 }
 
+function formatCompactNumber(value: number) {
+  return new Intl.NumberFormat('en-NG', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
 export default function CEODashboardPage() {
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState(mockDashboardMetrics);
@@ -85,7 +92,6 @@ export default function CEODashboardPage() {
     {
       title: 'Total Stock Value',
       value: formatCurrency(metrics.totalStock.value, 'NGN'),
-      unit: 'NGN',
       trend: metrics.totalStock.trend,
       icon: <Package className="h-5 w-5" />,
       description: 'Current inventory',
@@ -93,7 +99,6 @@ export default function CEODashboardPage() {
     {
       title: 'Total Sales',
       value: formatCurrency(metrics.totalSales.amount, 'NGN'),
-      unit: 'NGN',
       trend: metrics.totalSales.trend,
       icon: <TrendingUp className="h-5 w-5" />,
       description: 'This period',
@@ -108,7 +113,6 @@ export default function CEODashboardPage() {
     {
       title: 'Stock Variance',
       value: formatCurrency(Math.abs(metrics.reconciliationVariance.amount), 'NGN'),
-      unit: 'NGN',
       trend: metrics.reconciliationVariance.percentage,
       icon: <Zap className="h-5 w-5" />,
     },
@@ -183,7 +187,7 @@ export default function CEODashboardPage() {
                   <LineChart data={analytics.salesTrend}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="period" tickLine={false} axisLine={false} />
-                    <YAxis tickLine={false} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatCompactNumber(Number(value))} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Line type="monotone" dataKey="sales" stroke="var(--color-sales)" strokeWidth={2} dot={false} />
                     <Line type="monotone" dataKey="quantity" stroke="var(--color-quantity)" strokeWidth={2} dot={false} />
@@ -203,7 +207,7 @@ export default function CEODashboardPage() {
                   <ComposedChart data={analytics.revenueVsCogs}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="period" tickLine={false} axisLine={false} />
-                    <YAxis tickLine={false} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatCompactNumber(Number(value))} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Bar dataKey="revenue" fill="var(--color-revenue)" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="cogs" fill="var(--color-cogs)" radius={[4, 4, 0, 0]} />
@@ -226,7 +230,7 @@ export default function CEODashboardPage() {
                   <BarChart data={analytics.stockByLocation}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="category" tickLine={false} axisLine={false} />
-                    <YAxis tickLine={false} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatCompactNumber(Number(value))} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Bar dataKey="warehouse" stackId="stock" fill="var(--color-warehouse)" />
                     <Bar dataKey="branch" stackId="stock" fill="var(--color-branch)" />
@@ -247,7 +251,7 @@ export default function CEODashboardPage() {
                   <ComposedChart data={analytics.transferVariance}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="route" tickLine={false} axisLine={false} />
-                    <YAxis tickLine={false} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatCompactNumber(Number(value))} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Bar dataKey="sent" fill="var(--color-sent)" />
                     <Bar dataKey="received" fill="var(--color-received)" />
@@ -270,7 +274,7 @@ export default function CEODashboardPage() {
                   <AreaChart data={analytics.leakageTrend}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="period" tickLine={false} axisLine={false} />
-                    <YAxis tickLine={false} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatCompactNumber(Number(value))} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Area type="monotone" dataKey="quantityLost" stroke="var(--color-quantityLost)" fill="var(--color-quantityLost)" fillOpacity={0.2} />
                     <Area type="monotone" dataKey="valueLost" stroke="var(--color-valueLost)" fill="var(--color-valueLost)" fillOpacity={0.1} />
@@ -290,7 +294,7 @@ export default function CEODashboardPage() {
                   <ComposedChart data={analytics.packagingEfficiency}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="period" tickLine={false} axisLine={false} />
-                    <YAxis tickLine={false} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatCompactNumber(Number(value))} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Bar dataKey="expected" fill="var(--color-expected)" />
                     <Bar dataKey="actual" fill="var(--color-actual)" />
@@ -312,7 +316,7 @@ export default function CEODashboardPage() {
                 <ChartContainer className="h-[320px] w-full" config={{ marginPct: { label: 'Margin %', color: '#15803d' } }}>
                   <BarChart data={analytics.productProfitability} layout="vertical" margin={{ left: 24 }}>
                     <CartesianGrid horizontal={false} />
-                    <XAxis type="number" tickLine={false} axisLine={false} />
+                    <XAxis type="number" tickLine={false} axisLine={false} tickFormatter={(value) => formatCompactNumber(Number(value))} />
                     <YAxis type="category" dataKey="product" width={120} tickLine={false} axisLine={false} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Bar dataKey="marginPct" fill="var(--color-marginPct)" radius={[0, 4, 4, 0]} />
@@ -354,7 +358,7 @@ export default function CEODashboardPage() {
                   <BarChart data={pnlBridgeWithColor}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="step" tickLine={false} axisLine={false} />
-                    <YAxis tickLine={false} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatCompactNumber(Number(value))} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                       {pnlBridgeWithColor.map((step) => (
@@ -377,7 +381,7 @@ export default function CEODashboardPage() {
                   <LineChart data={analytics.assetBankTrend}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="period" tickLine={false} axisLine={false} />
-                    <YAxis tickLine={false} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatCompactNumber(Number(value))} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Line type="monotone" dataKey="assets" stroke="var(--color-assets)" strokeWidth={2} dot={false} />
                     <Line type="monotone" dataKey="bank" stroke="var(--color-bank)" strokeWidth={2} dot={false} />
@@ -390,7 +394,7 @@ export default function CEODashboardPage() {
 
         <div>
           <h2 className="text-2xl font-bold mb-4">Top Products</h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {metrics.topProducts.map((product) => (
               <div key={product.id} className="rounded-lg border border-border bg-card p-4">
                 <div className="space-y-2">

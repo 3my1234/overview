@@ -112,6 +112,8 @@ export default function Sidebar({ isOpen, onOpenChange, userRole }: SidebarProps
               {group.items.length === 1 ? (
                 <Link
                   href={group.items[0].href}
+                  prefetch={true}
+                  scroll={false}
                   className={cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                     pathname.startsWith(group.items[0].href)
@@ -151,6 +153,8 @@ export default function Sidebar({ isOpen, onOpenChange, userRole }: SidebarProps
                         <Link
                           key={item.href}
                           href={item.href}
+                          prefetch={true}
+                          scroll={false}
                           className={cn(
                             'block rounded-lg px-3 py-2 text-sm transition-colors',
                             pathname === item.href

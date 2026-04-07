@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ROLE_LABELS } from '@/lib/constants';
-import { createUser, getUsers, getWorkers } from '@/lib/api/client';
+import { createUser, getCurrentUser, getUsers, getWorkers } from '@/lib/api/client';
 import { User, Worker } from '@/lib/types';
 
 interface CreateUserForm {
@@ -46,15 +46,20 @@ export default function UsersPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState<CreateUserForm>(initialCreateUserForm);
+  const [actorRole, setActorRole] = useState<User['role'] | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadData() {
-      const [usersData, workersData] = await Promise.all([getUsers(), getWorkers()]);
+      const [usersData, workersData, currentUser] = await Promise.all([getUsers(), getWorkers(), getCurrentUser()]);
       if (!isMounted) return;
       setUsers(usersData);
       setWorkers(workersData);
+      setActorRole(currentUser?.role || null);
+      if (currentUser?.role === 'admin') {
+        setForm((prev) => ({ ...prev, role: 'worker' }));
+      }
     }
 
     void loadData();
@@ -134,6 +139,11 @@ export default function UsersPage() {
     setError('');
 
     try {
+      if (actorRole === 'admin' && form.role !== 'worker') {
+        setError('Admin accounts can only create worker login users.');
+        return;
+      }
+
       const newUser = await createUser({
         name: form.name,
         username: form.username,
@@ -154,8 +164,11 @@ export default function UsersPage() {
     }
   }
 
+  const canCreateAdmin = actorRole === 'super_admin';
+  const canManageUsers = actorRole === 'super_admin' || actorRole === 'admin';
+
   return (
-    <AppShell userRole="super_admin">
+    <AppShell userRole={actorRole || 'admin'}>
       <div className="space-y-6">
         <PageHeader
           title="User Management"
@@ -165,17 +178,18 @@ export default function UsersPage() {
             { label: 'Users' },
           ]}
           actions={
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Login User
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>Create Login User</DialogTitle>
-                </DialogHeader>
+            canManageUsers ? (
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Login User
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Create Login User</DialogTitle>
+                  </DialogHeader>
 
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
@@ -215,7 +229,7 @@ export default function UsersPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="admin">Admin</SelectItem>
+                        {canCreateAdmin && <SelectItem value="admin">Admin</SelectItem>}
                         <SelectItem value="worker">Worker</SelectItem>
                       </SelectContent>
                     </Select>
@@ -284,7 +298,8 @@ export default function UsersPage() {
                   </div>
                 </div>
               </DialogContent>
-            </Dialog>
+              </Dialog>
+            ) : undefined
           }
         />
 

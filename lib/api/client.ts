@@ -107,6 +107,9 @@ export interface SuperAdminProfile {
   role: Role;
 }
 
+let currentUserCache: CurrentUser | null | undefined;
+let currentUserPromise: Promise<CurrentUser | null> | null = null;
+
 async function fetchWithFallback<T>(path: string, fallbackData: T): Promise<T> {
   try {
     const response = await fetch(`${API_BASE}${path}`, {
@@ -391,21 +394,58 @@ export async function createWorker(payload: WorkerCreatePayload): Promise<Worker
 }
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
+  if (currentUserCache !== undefined) {
+    return currentUserCache;
+  }
+
+  if (currentUserPromise) {
+    return currentUserPromise;
+  }
+
+  currentUserPromise = (async () => {
+    try {
+      const response = await fetch(`${API_BASE}/auth/me`, {
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        currentUserCache = null;
+        return null;
+      }
+
+      const envelope = (await response.json()) as ApiEnvelope<CurrentUser>;
+      if (!envelope.success || !envelope.data) {
+        currentUserCache = null;
+        return null;
+      }
+
+      currentUserCache = envelope.data;
+      return envelope.data;
+    } catch {
+      currentUserCache = null;
+      return null;
+    } finally {
+      currentUserPromise = null;
+    }
+  })();
+
+  return currentUserPromise;
+}
+
+export function clearCurrentUserCache() {
+  currentUserCache = undefined;
+  currentUserPromise = null;
+}
+
+export function primeCurrentUserCache(user: CurrentUser | null) {
+  currentUserCache = user;
+  currentUserPromise = null;
+}
+
+export async function refreshCurrentUser(): Promise<CurrentUser | null> {
+  clearCurrentUserCache();
   try {
-    const response = await fetch(`${API_BASE}/auth/me`, {
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const envelope = (await response.json()) as ApiEnvelope<CurrentUser>;
-    if (!envelope.success || !envelope.data) {
-      return null;
-    }
-
-    return envelope.data;
+    return await getCurrentUser();
   } catch {
     return null;
   }
@@ -429,6 +469,7 @@ export async function login(identifier: string, password: string): Promise<Curre
     throw new Error(envelope.error || 'invalid_credentials');
   }
 
+  primeCurrentUserCache(envelope.data);
   return envelope.data;
 }
 
@@ -436,6 +477,7 @@ export async function logout(): Promise<void> {
   await fetch(`${API_BASE}/auth/logout`, {
     method: 'POST',
   });
+  clearCurrentUserCache();
 }
 
 export async function getUsers(): Promise<User[]> {
