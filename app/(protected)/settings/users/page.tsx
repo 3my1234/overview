@@ -1,5 +1,6 @@
 ﻿'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 
@@ -131,11 +132,24 @@ export default function UsersPage() {
   ];
 
   async function handleCreateUser() {
-    if (!form.name || !form.username || !form.email || !form.password) return;
-    if (form.role === 'worker' && !form.workerId) return;
+    setError('');
+
+    if (!form.name || !form.username || !form.email || !form.password) {
+      setError('Please complete all required fields.');
+      return;
+    }
+
+    if (form.role === 'worker' && unlinkedWorkers.length === 0) {
+      setError('No available worker profile to link. Create worker profile first in Settings > Workers.');
+      return;
+    }
+
+    if (form.role === 'worker' && !form.workerId) {
+      setError('Please select a worker profile to link this login account.');
+      return;
+    }
 
     setSubmitting(true);
-    setError('');
 
     try {
       if (actorRole === 'admin' && form.role !== 'worker') {
@@ -165,6 +179,13 @@ export default function UsersPage() {
 
   const canCreateAdmin = actorRole === 'super_admin';
   const canManageUsers = actorRole === 'super_admin' || actorRole === 'admin';
+  const createDisabled =
+    submitting ||
+    !form.name ||
+    !form.username ||
+    !form.email ||
+    !form.password ||
+    (form.role === 'worker' && (!form.workerId || unlinkedWorkers.length === 0));
 
   return (
     <div className="space-y-6">
@@ -247,6 +268,11 @@ export default function UsersPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">Select worker profile</SelectItem>
+                          {unlinkedWorkers.length === 0 && (
+                            <SelectItem value="no-workers" disabled>
+                              No available worker profiles
+                            </SelectItem>
+                          )}
                           {unlinkedWorkers.map((worker) => (
                             <SelectItem key={worker.id} value={worker.id}>
                               {worker.employeeCode} - {worker.fullName}
@@ -254,6 +280,15 @@ export default function UsersPage() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {unlinkedWorkers.length === 0 && (
+                        <p className="text-xs text-amber-600">
+                          No unlinked worker profile exists yet. Create one in{' '}
+                          <Link className="underline" href="/settings/workers">
+                            Settings &gt; Workers
+                          </Link>{' '}
+                          first.
+                        </p>
+                      )}
                     </div>
                   )}
 
@@ -290,7 +325,7 @@ export default function UsersPage() {
                     <Button variant="outline" onClick={() => setOpen(false)} disabled={submitting}>
                       Cancel
                     </Button>
-                    <Button onClick={() => void handleCreateUser()} disabled={submitting}>
+                    <Button onClick={() => void handleCreateUser()} disabled={createDisabled}>
                       {submitting ? 'Saving...' : 'Create User'}
                     </Button>
                   </div>
