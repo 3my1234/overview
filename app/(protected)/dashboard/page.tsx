@@ -2,27 +2,8 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { AUTH_SESSION_COOKIE } from '@/lib/auth/constants';
+import { getDefaultRouteForRole } from '@/lib/auth/rbac';
 import { getSessionUser, prepareAuthStore } from '@/lib/server/auth-store';
-
-function resolveDashboardRoute(role: string) {
-  switch (role) {
-    case 'super_admin':
-    case 'admin':
-    case 'ceo':
-      return '/dashboard/ceo';
-    case 'warehouse_manager':
-      return '/inventory/purchases';
-    case 'sales_manager':
-    case 'worker':
-      return '/sales/transactions';
-    case 'accountant':
-      return '/accounting/journals';
-    case 'auditor':
-      return '/audit/logs';
-    default:
-      return '/dashboard/ceo';
-  }
-}
 
 export default async function DashboardPage() {
   await prepareAuthStore();
@@ -34,5 +15,5 @@ export default async function DashboardPage() {
     redirect('/auth/login');
   }
 
-  redirect(resolveDashboardRoute(user.role));
+  redirect(getDefaultRouteForRole(user.role));
 }
