@@ -19,6 +19,7 @@ export default function AppShell({ children, userRole }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const [currentUser, setCurrentUser] = React.useState<CurrentUser | null>(null);
   const [authResolved, setAuthResolved] = React.useState(false);
+  const [redirectingToLogin, setRedirectingToLogin] = React.useState(false);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -28,8 +29,13 @@ export default function AppShell({ children, userRole }: AppShellProps) {
       if (!isMounted) return;
 
       if (!user) {
-        setAuthResolved(true);
-        router.replace('/auth/login');
+        setRedirectingToLogin(true);
+        await logout();
+        if (typeof window !== 'undefined') {
+          window.location.replace('/auth/login');
+        } else {
+          router.replace('/auth/login');
+        }
         return;
       }
 
@@ -55,6 +61,14 @@ export default function AppShell({ children, userRole }: AppShellProps) {
     await logout();
     router.push('/auth/login');
     router.refresh();
+  }
+
+  if (redirectingToLogin) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Redirecting to login...</p>
+      </div>
+    );
   }
 
   if (!authResolved || !currentUser) {
