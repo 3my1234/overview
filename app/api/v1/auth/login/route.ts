@@ -27,7 +27,23 @@ export async function POST(request: Request) {
     }
 
     const user = await findUserByIdentifier(parsed.data.identifier);
-    if (!user || !(await validateUserPassword(user.id, parsed.data.password))) {
+    if (!user) {
+      console.warn(`[auth] login failed: user_not_found identifier=${parsed.data.identifier}`);
+      return NextResponse.json(fail('invalid_credentials', 'Invalid login details.'), {
+        status: 401,
+      });
+    }
+
+    if (user.status !== 'active') {
+      console.warn(`[auth] login failed: inactive_user user=${user.username}`);
+      return NextResponse.json(fail('account_inactive', 'This account is inactive.'), {
+        status: 403,
+      });
+    }
+
+    const isValidPassword = await validateUserPassword(user.id, parsed.data.password);
+    if (!isValidPassword) {
+      console.warn(`[auth] login failed: invalid_password user=${user.username}`);
       return NextResponse.json(fail('invalid_credentials', 'Invalid login details.'), {
         status: 401,
       });
@@ -52,6 +68,7 @@ export async function POST(request: Request) {
       path: '/',
     });
 
+    console.info(`[auth] login success: user=${user.username} role=${user.role}`);
     return response;
   } catch {
     const bootstrapUser = await getBootstrapSuperAdmin();

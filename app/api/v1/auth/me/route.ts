@@ -15,7 +15,15 @@ export async function GET(request: Request) {
 
   const user = await getSessionUser(sessionToken);
   if (!user) {
-    return NextResponse.json(fail('unauthorized', 'No active session.'), { status: 401 });
+    const response = NextResponse.json(fail('unauthorized', 'No active session.'), { status: 401 });
+    response.cookies.set(AUTH_SESSION_COOKIE, '', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+      expires: new Date(0),
+      path: '/',
+    });
+    return response;
   }
 
   return NextResponse.json(

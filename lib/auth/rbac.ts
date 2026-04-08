@@ -2,7 +2,7 @@ import { Role } from '@/lib/types';
 
 const roleAllowedPrefixes: Record<Role, string[]> = {
   super_admin: [
-    '/dashboard',
+    '/dashboard/ceo',
     '/inventory',
     '/sales',
     '/accounting',
@@ -12,24 +12,22 @@ const roleAllowedPrefixes: Record<Role, string[]> = {
     '/reconciliation',
   ],
   admin: [
-    '/dashboard',
+    '/dashboard/admin',
     '/inventory',
     '/sales',
-    '/accounting',
-    '/reports',
+    '/reports/operational',
     '/settings/users',
     '/settings/workers',
     '/reconciliation',
   ],
-  ceo: ['/dashboard', '/reports', '/inventory', '/sales', '/accounting', '/audit', '/reconciliation'],
-  accountant: ['/dashboard', '/accounting', '/reports/financial'],
-  warehouse_manager: ['/dashboard', '/inventory', '/reconciliation/daily'],
-  sales_manager: ['/dashboard', '/sales'],
-  auditor: ['/dashboard', '/audit', '/reports/financial'],
+  ceo: ['/dashboard/ceo', '/reports', '/inventory', '/sales', '/accounting', '/audit', '/reconciliation'],
+  accountant: ['/accounting', '/reports/financial'],
+  warehouse_manager: ['/inventory', '/reconciliation/daily'],
+  sales_manager: ['/sales'],
+  auditor: ['/audit', '/reports/financial'],
   worker: [
-    '/dashboard',
+    '/dashboard/worker',
     '/sales/transactions',
-    '/inventory/purchases',
     '/inventory/transfers',
     '/inventory/production',
     '/reconciliation/daily',
@@ -39,14 +37,16 @@ const roleAllowedPrefixes: Record<Role, string[]> = {
 export function getDefaultRouteForRole(role: Role): string {
   switch (role) {
     case 'super_admin':
-    case 'admin':
     case 'ceo':
       return '/dashboard/ceo';
+    case 'admin':
+      return '/dashboard/admin';
     case 'warehouse_manager':
       return '/inventory/purchases';
     case 'sales_manager':
-    case 'worker':
       return '/sales/transactions';
+    case 'worker':
+      return '/dashboard/worker';
     case 'accountant':
       return '/accounting/journals';
     case 'auditor':
@@ -58,7 +58,7 @@ export function getDefaultRouteForRole(role: Role): string {
 
 export function canRoleAccessPath(role: Role, pathname: string): boolean {
   if (pathname === '/' || pathname.startsWith('/auth')) return true;
+  if (pathname === '/dashboard') return true;
   const allowedPrefixes = roleAllowedPrefixes[role] || [];
   return allowedPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
-
