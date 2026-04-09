@@ -115,7 +115,7 @@ export default function PPELedgerPage() {
                   Add Asset
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-lg">
+              <DialogContent aria-describedby={undefined} className="sm:max-w-lg">
                 <DialogHeader>
                   <DialogTitle>Add PPE Asset</DialogTitle>
                 </DialogHeader>

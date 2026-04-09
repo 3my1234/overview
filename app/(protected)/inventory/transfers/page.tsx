@@ -263,7 +263,7 @@ export default function TransfersPage() {
                     Receive Transfer
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+                <DialogContent aria-describedby={undefined} className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>Receive and Reconcile Transfer</DialogTitle>
                   </DialogHeader>
@@ -366,7 +366,7 @@ export default function TransfersPage() {
                     New Transfer
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-lg">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-lg">
                   <DialogHeader>
                     <DialogTitle>Create Transfer Note</DialogTitle>
                   </DialogHeader>

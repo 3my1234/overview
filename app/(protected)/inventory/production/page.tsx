@@ -177,7 +177,7 @@ export default function ProductionPage() {
                   New Production
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-lg">
+              <DialogContent aria-describedby={undefined} className="sm:max-w-lg">
                 <DialogHeader>
                   <DialogTitle>Post Production Batch</DialogTitle>
                 </DialogHeader>

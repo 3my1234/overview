@@ -211,7 +211,7 @@ export default function WorkersPage() {
                     Add Worker
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+                <DialogContent aria-describedby={undefined} className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>Create Worker Profile</DialogTitle>
                   </DialogHeader>

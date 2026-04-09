@@ -302,7 +302,7 @@ export async function getTrialBalance(): Promise<TrialBalance[]> {
 }
 
 export async function getSalesTransactions(): Promise<SalesTransaction[]> {
-  return fetchWithFallback('/sales/transactions', mockSalesTransactions);
+  return fetchWithFallback('/sales/transactions', []);
 }
 
 export async function createSalesTransaction(payload: {

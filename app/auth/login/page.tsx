@@ -1,13 +1,13 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { getCurrentUser, login } from '@/lib/api/client';
+import { login } from '@/lib/api/client';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,24 +15,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function checkSession() {
-      const user = await getCurrentUser();
-      if (!isMounted) return;
-      if (user) {
-        router.replace('/dashboard');
-        router.refresh();
-      }
-    }
-
-    void checkSession();
-    return () => {
-      isMounted = false;
-    };
-  }, [router]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();

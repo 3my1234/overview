@@ -172,7 +172,7 @@ export default function PurchasesPage() {
                   New Purchase Order
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-lg">
+              <DialogContent aria-describedby={undefined} className="sm:max-w-lg">
                 <DialogHeader>
                   <DialogTitle>Record Purchase</DialogTitle>
                 </DialogHeader>

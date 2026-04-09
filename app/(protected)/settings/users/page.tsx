@@ -205,7 +205,7 @@ export default function UsersPage() {
                     Create Login User
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-lg">
+                <DialogContent aria-describedby={undefined} className="sm:max-w-lg">
                   <DialogHeader>
                     <DialogTitle>Create Login User</DialogTitle>
                   </DialogHeader>

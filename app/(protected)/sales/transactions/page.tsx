@@ -4,7 +4,6 @@ import PageHeader from '@/components/layout/page-header';
 import DataTable, { DataTableColumn } from '@/components/table/data-table';
 import FilterBar, { FilterConfig } from '@/components/filters/filter-bar';
 import StatusBadge from '@/components/badges/status-badge';
-import { mockSalesTransactions, mockWarehouses, mockBranches } from '@/lib/mock-data';
 import { createSalesTransaction, getMasterData, getProducts, getSalesTransactions } from '@/lib/api/client';
 import { formatDate, formatCurrency, formatNumber } from '@/lib/utils/formatting';
 import { Product, SalesTransaction } from '@/lib/types';
@@ -19,9 +18,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 export default function SalesTransactionsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<Record<string, any>>({});
-  const [salesTransactions, setSalesTransactions] = useState<SalesTransaction[]>(mockSalesTransactions);
-  const [warehouses, setWarehouses] = useState(mockWarehouses);
-  const [branches, setBranches] = useState(mockBranches);
+  const [salesTransactions, setSalesTransactions] = useState<SalesTransaction[]>([]);
+  const [warehouses, setWarehouses] = useState<Array<{ id: string; name: string }>>([]);
+  const [branches, setBranches] = useState<Array<{ id: string; name: string }>>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -217,7 +216,7 @@ export default function SalesTransactionsPage() {
                   New Sale
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-lg">
+              <DialogContent aria-describedby={undefined} className="sm:max-w-lg">
                 <DialogHeader>
                   <DialogTitle>Record Branch Sale</DialogTitle>
                 </DialogHeader>
